@@ -7,6 +7,7 @@ const ownersStore = require('../store/owners');
 const { getTargetJid } = require('./parser');
 const { pingResponse, randomNumber } = require('../features/games');
 const { buildMenuMessage } = require('../features/menu');
+const { section, row, status, success } = require('../features/ui');
 const {
   buildMcpatchInfo,
   buildShadersIntro,
@@ -45,7 +46,7 @@ const commands = {
       const min = parseInt(args[0], 10);
       const max = parseInt(args[1], 10);
       const num = Number.isFinite(min) && Number.isFinite(max) ? randomNumber(min, max) : randomNumber(1, 100);
-      await sock.sendMessage(groupId, { text: `🎲 Angka acak: *${num}*`, footer: config.footerText });
+      await sock.sendMessage(groupId, { text: `✓ random.number = *${num}*`, footer: config.footerText });
     },
   },
   mcpatch: {
@@ -72,7 +73,10 @@ const commands = {
           return;
         }
         await sock.sendMessage(groupId, {
-          text: `Format:\n${config.prefix}mcpatch set version <versi>\n${config.prefix}mcpatch set link <url>`,
+          text: section('format', [
+            `${config.prefix}mcpatch set version <versi>`,
+            `${config.prefix}mcpatch set link <url>`,
+          ]),
         });
         return;
       }
@@ -410,22 +414,21 @@ const commands = {
     adminOnly: true,
     handler: async ({ sock, groupId }) => {
       const s = await getSettings(groupId);
-      const text = `
-⚙️ *PENGATURAN GRUP INI*
-
-🔗 Antilink: ${flag(s.antilink.enabled)} _(whitelist: ${s.antilink.whitelist.length})_
-🚫 Antitag Admin: ${flag(s.antitagadmin.enabled)}
-🚫 Antitag Semua: ${flag(s.antitagall.enabled)} _(threshold: ${s.antitagall.threshold})_
-🚫 Antitag Status: ${flag(s.antitagstatus.enabled)}
-🌊 Antiflood: ${flag(s.antiflood.enabled)} _(${s.antiflood.maxMessages} pesan / ${s.antiflood.windowSeconds}s)_
-🤬 Antibadword: ${flag(s.antibadword.enabled)} _(${s.antibadword.words.length} kata)_
-👋 Welcome: ${flag(s.welcome.enabled)} _(dwibahasa EN/ID otomatis)_
-🚪 Leave message: ${flag(s.leaveMessage?.enabled)} _(dwibahasa EN/ID otomatis)_
-👢 Auto-kick di: *${s.autoKickAt}x* warn
-
-*Limit warn per tipe:*
-${Object.entries(s.warnLimits).map(([k, v]) => `▸ ${k}: ${v}`).join('\n')}
-`.trim();
+      const text = [
+        section('GROUP SETTINGS', [
+          row('antilink', `${flag(s.antilink.enabled)} / whitelist: ${s.antilink.whitelist.length}`),
+          row('antitag admin', flag(s.antitagadmin.enabled)),
+          row('antitag all', `${flag(s.antitagall.enabled)} / threshold: ${s.antitagall.threshold}`),
+          row('antitag status', flag(s.antitagstatus.enabled)),
+          row('antiflood', `${flag(s.antiflood.enabled)} / ${s.antiflood.maxMessages} msg per ${s.antiflood.windowSeconds}s`),
+          row('antibadword', `${flag(s.antibadword.enabled)} / ${s.antibadword.words.length} words`),
+          row('welcome', `${flag(s.welcome.enabled)} / auto EN-ID`),
+          row('leave message', `${flag(s.leaveMessage?.enabled)} / auto EN-ID`),
+          row('auto kick', `after *${s.autoKickAt}x* warn`),
+        ]),
+        '',
+        section('WARN LIMITS', Object.entries(s.warnLimits).map(([k, v]) => row(k, v))),
+      ].join('\n');
       await sock.sendMessage(groupId, { text, footer: config.footerText });
     },
   },
@@ -510,16 +513,16 @@ commands.mute.handler = commands.close.handler;
 commands.unmute.handler = commands.open.handler;
 
 function flag(v) {
-  return v ? '✅ ON' : '❌ OFF';
+  return status(v);
 }
 
 async function toggleSetting(sock, groupId, args, key) {
   const val = (args[0] || '').toLowerCase();
   if (val !== 'on' && val !== 'off') {
-    return sock.sendMessage(groupId, { text: `Format: ${config.prefix}${key} on/off` });
+    return sock.sendMessage(groupId, { text: section('format', [`${config.prefix}${key} on`, `${config.prefix}${key} off`]) });
   }
   await updateSettings(groupId, { [key]: { enabled: val === 'on' } });
-  await sock.sendMessage(groupId, { text: `✅ ${key} sekarang: ${val === 'on' ? 'ON' : 'OFF'}` });
+  await sock.sendMessage(groupId, { text: success(`${key} sekarang ${val === 'on' ? 'ON' : 'OFF'}`) });
 }
 
 module.exports = { commands };

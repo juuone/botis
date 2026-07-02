@@ -31,7 +31,10 @@ function extractText(msg) {
     m.extendedTextMessage?.text ||
     m.imageMessage?.caption ||
     m.videoMessage?.caption ||
+    m.buttonsResponseMessage?.selectedButtonId ||
     m.buttonsResponseMessage?.selectedDisplayText ||
+    m.listResponseMessage?.singleSelectReply?.selectedRowId ||
+    m.templateButtonReplyMessage?.selectedId ||
     m.templateButtonReplyMessage?.selectedDisplayText ||
     ''
   );

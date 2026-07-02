@@ -1,6 +1,6 @@
 function pingResponse(startMs) {
   const latency = Date.now() - startMs;
-  return `🏓 Pong! ${latency}ms`;
+  return `✓ pong / latency: *${latency}ms*`;
 }
 
 function randomNumber(min = 1, max = 100) {
