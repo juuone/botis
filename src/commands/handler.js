@@ -123,14 +123,17 @@ const commands = {
     handler: async ({ sock, msg, groupId, sender }) => {
       const target = getTargetJid(msg) || sender;
       const fallbackName = target === sender ? msg.pushName : null;
-      const profile = await getUserProfile(sock, target, fallbackName);
-
       const isGroupChat = groupId.endsWith('@g.us');
-      let warnInfo = { inGroup: false, count: 0 };
-      if (isGroupChat) {
-        const record = await warns.getUserWarn(groupId, target);
-        warnInfo = { inGroup: true, count: record.count };
-      }
+
+      // Kasih indikator "mengetik..." dulu -- gak bikin lebih cepat, tapi user tau bot lagi proses
+      sock.sendPresenceUpdate('composing', groupId).catch(() => {});
+
+      // Ambil profil & warn BARENGAN (bukan satu nunggu yang lain selesai dulu)
+      const [profile, warnRecord] = await Promise.all([
+        getUserProfile(sock, target, fallbackName),
+        isGroupChat ? warns.getUserWarn(groupId, target) : Promise.resolve({ count: 0 }),
+      ]);
+      const warnInfo = { inGroup: isGroupChat, count: warnRecord.count };
 
       const caption = buildProfileCaption(profile, warnInfo);
 
