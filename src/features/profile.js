@@ -5,20 +5,15 @@
  * total warn orang itu di grup ini.
  */
 async function getUserProfile(sock, jid, fallbackName) {
-  let bio = null;
-  try {
-    const status = await sock.fetchStatus(jid);
-    bio = status?.status || null;
-  } catch (err) {
-    bio = null;
-  }
+  // Dijalankan BARENGAN (bukan satu-satu) — ini yang bikin .user kerasa lemot
+  // sebelumnya, karena tiap request ke server WhatsApp itu ada jeda jaringan sendiri.
+  const [statusResult, pictureResult] = await Promise.allSettled([
+    sock.fetchStatus(jid),
+    sock.profilePictureUrl(jid, 'image'),
+  ]);
 
-  let pictureUrl = null;
-  try {
-    pictureUrl = await sock.profilePictureUrl(jid, 'image');
-  } catch (err) {
-    pictureUrl = null;
-  }
+  const bio = statusResult.status === 'fulfilled' ? statusResult.value?.status || null : null;
+  const pictureUrl = pictureResult.status === 'fulfilled' ? pictureResult.value : null;
 
   return {
     jid,
