@@ -57,7 +57,7 @@ function buildMenuMessage() {
   ].join('\n');
 
   const buttons = [
-    listButton('☰ Pilih Menu', [
+    listButton('Pilih Menu', [
       {
         title: 'Umum',
         rows: [
