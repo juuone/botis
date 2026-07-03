@@ -1,0 +1,23 @@
+{
+  "name": "wa-mod-bot",
+  "version": "2.0.0",
+  "description": "Bot WhatsApp moderator - antilink, antitag, warn system, welcome, mcpatch/shaders, native interactive buttons (Baileys v7 + ESM)",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "dependencies": {
+    "@whiskeysockets/baileys": "7.0.0-rc13",
+    "@hapi/boom": "^10.0.1",
+    "@libsql/client": "^0.14.0",
+    "express": "^4.19.2",
+    "pino": "^9.2.0",
+    "dotenv": "^16.4.5",
+    "qrcode-terminal": "^0.12.0",
+    "qrcode": "^1.5.4"
+  }
+}
